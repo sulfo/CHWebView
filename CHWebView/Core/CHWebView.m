@@ -164,6 +164,29 @@
     }
 }
 #pragma maek WKWebView Deleagte
+- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
+
+    if (!navigationAction.targetFrame.isMainFrame) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0) {
+            //older than iOS 8 code here
+            [[UIApplication sharedApplication] openURL:[navigationAction.request URL]];
+
+        } else {
+            //iOS 8 specific code here
+            [[UIApplication sharedApplication] openURL:[navigationAction.request URL] options:@{}
+                                     completionHandler:^(BOOL success) {
+                                         NSLog(@"Open: %d",success);
+                                         
+                                         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                         
+                                     }];
+        }
+    }
+    
+    return nil;
+}
 - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler {
 
     UIViewController *vc = [self fetchVC];
